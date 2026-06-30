@@ -1,0 +1,86 @@
+name: home_serve_frontend
+description: "HomeServe is a Flutter-based mobile and web application for managing home services and maintenance tasks."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # --- State management (Section 6) ---
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+
+  # --- Routing (Section 8 — NavShell, guards) ---
+  go_router: ^14.2.0
+
+  # --- Networking (Section 6.4 — Result<T> repositories) ---
+  dio: ^5.5.0
+
+  # --- Local storage / offline cache (Section 18) ---
+  flutter_secure_storage: ^9.2.2
+  drift: ^2.18.0
+  sqlite3_flutter_libs: ^0.5.24
+  path_provider: ^2.1.3
+  path: ^1.9.0
+
+  # --- Realtime (Quiz Battle WebSocket — Section 6.6) ---
+  web_socket_channel: ^3.0.1
+
+  # --- Serialization ---
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+
+  # --- UI / Theming (Section 11) ---
+  google_fonts: ^6.2.1
+  flutter_svg: ^2.0.10+1
+  lottie: ^3.1.2 # Child-tier motion: confetti, mascots, bounces
+
+  # --- Utilities ---
+  intl: ^0.19.0
+  collection: ^1.18.0
+  equatable: ^2.0.5
+
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+  # --- Code generation (Riverpod, Freezed, Drift, JSON) ---
+  build_runner: ^2.4.13
+  riverpod_generator: ^2.6.3
+  freezed: ^2.5.7
+  json_serializable: ^6.8.0
+  drift_dev: ^2.18.0
+
+  # Pinned directly: riverpod_generator's own transitive resolution can
+  # land on a too-new analyzer that analyzer_plugin (pulled in via
+  # custom_lint_core, itself pulled in by riverpod_lint) hasn't caught up
+  # with yet — symptoms are "Element2"/"publiclyExporting2" build script
+  # compile errors. See https://github.com/rrousselGit/riverpod/issues/4124.
+  # riverpod_lint and custom_lint are intentionally NOT listed here: they
+  # are IDE-assist only (quick-fixes/lints), not required to run
+  # build_runner or to use @riverpod at all. Add them back later, once
+  # that upstream issue is resolved, if you want the lint hints.
+  analyzer: 7.3.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/
+ 
+  #
+  # fonts: (Hind Siliguri for Bangla, per UI plan typography token)
+  #   - family: HindSiliguri
+  #     fonts:
+  #       - asset: assets/fonts/HindSiliguri-Regular.ttf
+  #       - asset: assets/fonts/HindSiliguri-Medium.ttf
+  #         weight: 500
+  #       - asset: assets/fonts/HindSiliguri-SemiBold.ttf
+  #         weight: 600
