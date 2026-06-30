@@ -90,10 +90,74 @@ Start with [`docs/proposal-report.md`](./docs/proposal-report.md) (or the `.docx
 
 ## Branching & Workflow
 
-- `main` — stable, demo-ready branch.
+- `main` — stable, demo-ready branch. **Never commit directly to `main`.**
 - Feature branches off `main`, named `feature/<short-description>` (e.g. `feature/booking-flow`).
 - Open a pull request for review before merging, even for small changes.
 - Keep backend and frontend changes in separate commits/PRs where possible to keep history reviewable.
+
+## Git Workflow Guide (for teammates new to GitHub)
+
+**First-time setup (do this once):**
+
+```bash
+git clone https://github.com/csesaidul/home_serve.git
+cd home_serve
+git config user.name "Your Name"
+git config user.email "your_email@example.com"
+```
+
+**Before you start any new work — always sync with `main` first:**
+
+```bash
+git checkout main
+git pull origin main
+```
+
+**Create your own branch for the task you're working on:**
+
+```bash
+git checkout -b feature/short-description
+```
+Example: `git checkout -b feature/login-screen`
+
+**While working — save your progress regularly:**
+
+```bash
+git add .
+git commit -m "Short, clear description of what you changed"
+```
+
+**Push your branch to GitHub:**
+
+```bash
+git push -u origin feature/short-description
+```
+(After the first push, `git push` alone is enough for that branch.)
+
+**Open a Pull Request (PR):**
+1. Go to the repo on GitHub — it will show a banner for your recently pushed branch.
+2. Click **Compare & pull request**.
+3. Write a short description of what you did, then **Create pull request**.
+4. Ask at least one teammate to review before merging into `main`.
+
+**After your PR is merged**, switch back to `main` and pull the latest changes before starting new work:
+```bash
+git checkout main
+git pull origin main
+```
+
+### Rules to avoid conflicts and breakage
+
+- **Never push directly to `main`.** All changes go through a feature branch + PR.
+- **Pull before you push.** Always run `git pull origin main` before starting new work, to avoid painful merge conflicts.
+- **One feature/fix per branch.** Don't mix unrelated changes in one branch or PR.
+- **Commit often, with clear messages.** Small, frequent commits are easier to review and revert than one giant commit.
+- **Never commit `.env` files**, API keys, passwords, or database credentials. Use `.env.example` to show what variables are needed, and keep real values only in your local `.env` (already excluded by `.gitignore`).
+- **Don't commit generated/build folders** (`build/`, `.dart_tool/`, `venv/`, `__pycache__/`) — these are machine-specific and already excluded by `.gitignore`.
+- **If you're unsure or stuck, ask before force-pushing or deleting branches** — `git push --force` and branch deletion can erase teammates' work.
+- **Resolve merge conflicts carefully**: if Git reports a conflict, open the conflicting file, look for `<<<<<<<`, `=======`, `>>>>>>>` markers, manually choose the correct code, remove the markers, then `git add` the file and commit.
+
+
 
 ## Team
 
