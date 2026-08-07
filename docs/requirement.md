@@ -6,7 +6,7 @@
 >
 > **Updated by:** [Saidul Islam](https://github.com/csesaidul)
 >
-> **Last Updated:** 2024-06-10
+> **Last Updated:** 07-Aug-2026
 >
 > **Last Updates:** Updated Authentication flow and account profile related requirements, added 2FA, updated data requirements and key entities, added new use cases, updated non-functional requirements (by [Saidul Islam](https://github.com/csesaidul)).
 
