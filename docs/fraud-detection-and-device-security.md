@@ -1,7 +1,7 @@
 # Fraud Detection & Device Security — Design Document
 
 **Project:** HomeServe
-**Author:** Saidul Islam
+**Author:** [Saidul Islam](https://github.com/csesaidul/)
 **Date:** 19-Aug-2026
 **Status:** Draft — companion to `requirement.md` v1.3 (FR-18 to FR-24)
 
@@ -40,7 +40,7 @@ Out of scope (for MVP):
 
 Five new tables support this feature, alongside the existing `users` table.
 
-![Device security schema](diagrams/schema.png)
+![Device security schema](assets/schema.png)
 
 ### 3.1 `devices`
 
@@ -115,7 +115,7 @@ Immutable, append-only. This table is the primary input to the fraud scoring job
 
 Every login or registration attempt passes through the same gate before a JWT is issued.
 
-![Fraud scoring flow](diagrams/fraud_flow.png)
+![Fraud scoring flow](assets/fraud_flow.png)
 
 **Order of checks (fail-fast, cheapest/highest-confidence first):**
 
