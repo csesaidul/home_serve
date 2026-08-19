@@ -1,4 +1,4 @@
-> **Version:** 1.2
+> **Version:** 1.3
 >
 > **Created by:** [Akikul Haque Sajib](https://github.com/akikul-haque-sajib)
 >
@@ -6,9 +6,9 @@
 >
 > **Updated by:** [Saidul Islam](https://github.com/csesaidul)
 >
-> **Last Updated:** 07-Aug-2026
+> **Last Updated:** 19-Aug-2026
 >
-> **Last Updates:** Updated Authentication flow and account profile related requirements, added 2FA, updated data requirements and key entities, added new use cases, updated non-functional requirements (by [Saidul Islam](https://github.com/csesaidul)).
+> **Last Updates:** Added device-level security controls (device logging, single-account-per-device restriction, failed-login lockout with OTP-based recovery, device/account blacklisting) and a fraud detection design, updated security non-functional requirements and key entities accordingly (by [Saidul Islam](https://github.com/csesaidul)).
 
 # **1. Functional Requirements**
 
@@ -16,7 +16,7 @@ Each requirement is identified with a unique ID for traceability.
 Priority is expressed as Must-Have (M), Should-Have (S), or Could-Have
 (C), following the MoSCoW method.
 
-## **1.1 Authentication & Account Management** *(Updated)*
+## **1.1 Authentication & Account Management**
 
 | **ID** | **Requirement Description** | **Priority** |
 |---|---|---|
@@ -37,6 +37,18 @@ Priority is expressed as Must-Have (M), Should-Have (S), or Could-Have
 | **FR-15** | The system shall allow a user to apply to become a Service Provider by completing a Provider Profile (skills, category, pricing, portfolio) and submitting it for verification, without needing a separate account. | M |
 | **FR-16** | The system shall store identity/security data collected during Client Verification and Provider Verification in a shared record, and reuse already-verified data so a user is not asked to resubmit the same information twice. | M |
 | **FR-17** | The system shall route a submitted Provider Profile to Admin for approval before the account gains provider capability (see FR-A-01). | M |
+
+## **1.1a Device Security & Fraud Prevention**
+
+| **ID** | **Requirement Description** | **Priority** |
+|---|---|---|
+| **FR-18** | The system shall log every registration and login attempt with device fingerprint, IP address, device type/OS, and timestamp, regardless of success or failure. | M |
+| **FR-19** | The system shall restrict each device to at most one associated account: a device already linked to an existing account shall not be allowed to register a new account or log in to a different account. | M |
+| **FR-20** | The system shall lock an account after 3 consecutive failed password attempts; while locked, password-based login shall be disabled. | M |
+| **FR-21** | The system shall allow a locked-out user to recover access only via the "Forgot Password" flow: an OTP is sent to the registered phone via AWS SNS, and on successful verification the user is shown an option to set a new password, which also unlocks the account. | M |
+| **FR-22** | The system shall allow an Admin to blacklist a specific device, blocking any further registration or login attempts from that device fingerprint. | M |
+| **FR-23** | The system shall allow an Admin to blacklist a specific account, blocking that account from logging in even with correct credentials or OTP. | M |
+| **FR-24** | The system shall compute a fraud-risk score for accounts and devices from signals such as multi-account device reuse attempts, abnormal registration velocity from one IP/device, repeated lockouts, and implausible location jumps between consecutive logins, and shall flag high-risk accounts/devices for Admin review. | S |
 
 ## **1.2 Customer Module**
 
@@ -90,7 +102,7 @@ Priority is expressed as Must-Have (M), Should-Have (S), or Could-Have
 - API endpoints should respond within 2 seconds under normal demo load
 - Live location updates should propagate to the customer's screen within 5 seconds of a provider's position change (polling fallback) or near-instantly over WebSocket
 
-## **2.2 Security** *(Updated)*
+## **2.2 Security**
 
 - Passwords shall be stored as salted hashes, never in plaintext, and shall meet a strong-password policy (minimum length and complexity) at creation
 - Phone numbers shall be verified via OTP (AWS SNS) at registration; OTP shall also be usable as an alternative login method
@@ -98,6 +110,12 @@ Priority is expressed as Must-Have (M), Should-Have (S), or Could-Have
 - All API traffic shall be authenticated via JWT except public endpoints (registration, OTP request/verify, login, category browsing)
 - Role/capability-based access control shall be enforced server-side, not only hidden in the UI, based on dynamic JWT claims rather than a single static role field
 - Identity/security data submitted for Client or Provider verification shall be stored once and shared between the two verification records to avoid duplicate collection and reduce exposure
+- Every registration and login attempt (success or failure) shall be logged with a device fingerprint, IP address, device/OS info, and timestamp, retained for audit and fraud-review purposes
+- A device fingerprint shall be permitted at most one associated account at a time; the API layer shall reject registration or login of a second account from an already-linked device
+- After 3 consecutive failed password attempts, the account shall be locked server-side; password-based login shall be rejected until the account is unlocked via OTP-based recovery
+- Locked-account recovery shall require phone OTP verification (AWS SNS) followed by setting a new password; a successful reset shall clear the lock and the failed-attempt counter
+- Admins shall be able to blacklist individual devices and individual accounts; blacklisted devices/accounts shall be rejected at the authentication layer before any token is issued
+- A rule-based fraud score shall be computed from device/account signals (see FR-24) and surfaced to Admin for manual review; the design shall not preclude adding further signals or moving to a learned model later
 
 ## **2.3 Usability**
 
@@ -130,7 +148,7 @@ Priority is expressed as Must-Have (M), Should-Have (S), or Could-Have
 
 - Device GPS sensor (for provider location sharing and customer location-based search) and standard touchscreen/mouse-keyboard input
 
-## **3.3 Software Interfaces** *(Updated)*
+## **3.3 Software Interfaces**
 
 - FastAPI backend exposing REST (JSON) and WebSocket endpoints
 - MySQL database accessed via an ORM over SQL queries
@@ -142,7 +160,7 @@ Priority is expressed as Must-Have (M), Should-Have (S), or Could-Have
 - HTTPS for all REST API calls
 - WebSocket (WSS) channels for live chat and location pings, with an HTTP polling fallback
 
-# **4. Key Use Cases** *(Updated)*
+# **4. Key Use Cases**
 
 | **ID** | **Use Case** | **Actor** | **Description** |
 |---|---|---|---|
@@ -157,8 +175,10 @@ Priority is expressed as Must-Have (M), Should-Have (S), or Could-Have
 | **UC-09** | **Login (Password or OTP)** | User | Registered user logs in with phone + password, or phone + OTP if the password is forgotten; location is refreshed on login. |
 | **UC-10** | **Complete Client Verification** | Client | Client submits required verification data the first time they attempt to hire a provider. |
 | **UC-11** | **Apply as Service Provider** | Client | Client completes a provider profile/portfolio and submits identity data for admin approval, gaining provider capability alongside their existing client capability. |
+| **UC-12** | **Recover a Locked Account** | User | After 3 failed password attempts, user taps "Forgot Password," verifies phone via OTP, and sets a new password to unlock the account. |
+| **UC-13** | **Review Fraud/Blacklist Flags** | Admin | Admin reviews accounts/devices flagged by the fraud score, and blacklists a device or account or clears the flag. |
 
-# **5. Data Requirements — Key Entities** *(Updated)*
+# **5. Data Requirements — Key Entities**
 
 The following core MySQL tables (simplified) support the functional
 requirements above.
@@ -175,7 +195,14 @@ requirements above.
 | **messages** | id, booking_id, sender_id, content, sent_at | Chat history per booking |
 | **location_pings** | id, booking_id, lat, lng, timestamp | Live location stream for active jobs |
 | **otp_requests** | id, user_id, phone, purpose (registration / login / 2fa), code_hash, expires_at, verified | Tracks OTP issuance/verification via AWS SNS for registration, OTP login, and 2FA |
+| **devices** | id, device_fingerprint, user_id (nullable, one active account per device), device_type, os, first_seen_at, last_seen_at | One row per known device; enforces the single-account-per-device rule and anchors device-level logs/blacklisting |
+| **auth_logs** | id, user_id (nullable), device_id, ip_address, action (register / login / otp_login / password_reset), status (success / fail), failure_reason, created_at | Immutable log of every registration/login attempt (FR-18), also feeds the fraud score |
+| **account_lockouts** | id, user_id, failed_attempts, locked_at, unlocked_at, unlock_method | Tracks the 3-strike lockout state and how/when the account was unlocked (FR-20/FR-21) |
+| **blacklist_entries** | id, target_type (device / account), target_id, reason, blacklisted_by (admin user_id), blacklisted_at, active | Admin-managed blacklist covering both devices and accounts (FR-22/FR-23) |
+| **fraud_scores** | id, user_id, device_id, score, signals (JSON: reused_device, registration_velocity, lockout_count, location_jump, ...), computed_at, reviewed_by, review_status | Rule-based fraud/risk score per account-device pair, queued for Admin review (FR-24) |
 
 ---
 
 *Note: Client Verification (FR-14) fields are marked as TBD and should be finalized before database/API implementation begins.*
+
+*Note: The fraud detection system (FR-24) is scoped as a rule-based scoring mechanism (weighted signals → threshold → Admin review queue), not a machine-learning model, given the team size and project timeline. The `fraud_scores.signals` JSON field is intentionally open-ended so new signals can be added without a schema change, keeping the door open for a learned model post-MVP.*
