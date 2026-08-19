@@ -1,6 +1,6 @@
 # Fraud Detection & Device Security — Design Document
 
-**Project:** HomeServe
+**Project:** [HomeServe](https://github.com/csesaidul/home_serve)
 **Author:** [Saidul Islam](https://github.com/csesaidul/)
 **Date:** 19-Aug-2026
 **Status:** Draft — companion to `requirement.md` v1.3 (FR-18 to FR-24)
