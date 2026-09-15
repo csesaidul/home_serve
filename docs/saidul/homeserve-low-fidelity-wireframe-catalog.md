@@ -3,6 +3,7 @@
 Created by [Saidul Islam](https://github.com/csesaidul).
 
 Source design: [HomeServe Figma file](https://www.figma.com/design/ahYvwVdVaxeDuqLWyA7sWc/HomeServe?node-id=0-1&t=CZOLQ3gcmDSxzoE6-1)
+Password: `retain-union-happy-invert`
 
 This document indexes the complete set of exported low-fidelity wireframes included in this repository. The screens are grouped by viewport and then by product flow so they are easier to review and maintain.
 
