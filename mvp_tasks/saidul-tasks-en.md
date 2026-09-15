@@ -127,8 +127,8 @@ Example: `saidul/D1-T5-flutter-skeleton`, `saidul/D2-T4-auth-screens`
 
 ```bash
 # 1. Clone the repo (first time only)
-git clone <REPO-URL>
-cd homeserve
+ git clone https://github.com/csesaidul/home_serve.git
+ cd home_serve
 
 # 3. Update local main before starting new work
 git checkout main

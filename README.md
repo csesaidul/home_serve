@@ -40,7 +40,7 @@ homeserve/
 
 ```bash
 git clone https://github.com/csesaidul/home_serve.git
-cd homeserve
+cd home_serve
 ```
 
 ### 2. Backend setup

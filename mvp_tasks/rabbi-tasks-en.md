@@ -111,8 +111,8 @@ Example: `rabbi/D1-T3-fastapi-setup`, `rabbi/D3-T2-booking-api`
 
 ```bash
 # 1. Clone the repo (first time only)
-git clone <REPO-URL>
-cd homeserve
+ git clone https://github.com/csesaidul/home_serve.git
+ cd home_serve
 
 # 3. Update local main before starting new work
 git checkout main

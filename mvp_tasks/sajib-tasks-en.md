@@ -106,8 +106,8 @@ Example: `sajib/D1-T1-er-diagram`, `sajib/D2-T2-figma-booking-screens`
 
 ```bash
 # 1. Clone the repo (first time only)
-git clone <REPO-URL>
-cd homeserve
+ git clone https://github.com/csesaidul/home_serve.git
+ cd home_serve
 
 # 3. Update local main before starting new work
 git checkout main
