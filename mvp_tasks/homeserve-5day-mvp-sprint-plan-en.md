@@ -1,7 +1,9 @@
 # HomeServe — 5-Day MVP Sprint Plan (Release 1: Mobile + Web)
 
 **Plan by:** [Saidul Islam](https://github.com/csesaidul)
+
 **Created:** September 15, 2026 | **Deadline:** September 19, 2026 (Saturday), 8:00 PM
+
 **Team:**
 - **Saidul Islam** — Project Lead & Lead Developer (Flutter, GoRouter, Riverpod, coordination, backup)
 - **Rabbi** — Backend Developer (FastAPI + XAMPP/MySQL)
