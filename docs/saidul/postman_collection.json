@@ -1,0 +1,416 @@
+{
+  "info": {
+    "name": "HomeServe MVP — Release 1 API Contract",
+    "description": "API contract for the HomeServe MVP (5-day sprint, Release 1: Mobile + Web). Covers Auth, Provider, Category, Booking, Review, Payment, and Admin endpoints. Built by Saidul Islam (D1-T6) as the contract for Rabbi's FastAPI backend (D2-T1, D3-T1, D3-T2, D4-T1, D4-T2).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000", "type": "string" },
+    { "key": "access_token", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"01712345678\",\n  \"name\": \"Rahim Uddin\",\n  \"gender\": \"male\",\n  \"password\": \"SecurePass123\"\n}"
+            },
+            "description": "Creates a new user with a hashed password and sends a mock OTP (no real AWS SNS in MVP-1). Response includes the mock OTP so it can be used directly in testing/demo."
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "code": 201,
+              "body": "{\n  \"user_id\": 101,\n  \"phone\": \"01712345678\",\n  \"otp_sent\": true,\n  \"mock_otp\": \"123456\"\n}"
+            },
+            {
+              "name": "409 Phone already registered",
+              "code": 409,
+              "body": "{\n  \"detail\": \"Phone number already registered\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/auth/verify-otp", "host": ["{{base_url}}"], "path": ["auth", "verify-otp"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"01712345678\",\n  \"otp_code\": \"123456\"\n}"
+            },
+            "description": "Marks phone_verified = true on the user when the OTP code matches."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{\n  \"phone\": \"01712345678\",\n  \"phone_verified\": true\n}"
+            },
+            {
+              "name": "400 Invalid OTP",
+              "code": 400,
+              "body": "{\n  \"detail\": \"Invalid or expired OTP\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"01712345678\",\n  \"password\": \"SecurePass123\"\n}"
+            },
+            "description": "Returns a JWT with capability claims (client_verified, provider_verified, is_admin). Used for GoRouter route guarding on the Flutter side (D2-T5)."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{\n  \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"token_type\": \"bearer\",\n  \"claims\": {\n    \"user_id\": 101,\n    \"client_verified\": true,\n    \"provider_verified\": false,\n    \"is_admin\": false\n  }\n}"
+            },
+            {
+              "name": "401 Invalid credentials",
+              "code": 401,
+              "body": "{\n  \"detail\": \"Invalid phone or password\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Provider",
+      "item": [
+        {
+          "name": "Create Provider Profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/provider/profile", "host": ["{{base_url}}"], "path": ["provider", "profile"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bio\": \"Experienced electrician, 5 years\",\n  \"skills\": [\"wiring\", \"appliance repair\"],\n  \"categories\": [1, 3],\n  \"portfolio\": [\"https://example.com/img1.jpg\"]\n}"
+            },
+            "description": "Creates a provider_profiles entry with status = pending. Requires a logged-in user (Bearer token)."
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "code": 201,
+              "body": "{\n  \"provider_id\": 55,\n  \"user_id\": 101,\n  \"status\": \"pending\",\n  \"verified\": false\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Provider Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/provider/profile/:user_id", "host": ["{{base_url}}"], "path": ["provider", "profile", ":user_id"] },
+            "description": "Returns a specific provider's public profile (bio, skills, categories, portfolio, rating_avg, verified)."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{\n  \"provider_id\": 55,\n  \"user_id\": 101,\n  \"name\": \"Rahim Uddin\",\n  \"bio\": \"Experienced electrician, 5 years\",\n  \"skills\": [\"wiring\", \"appliance repair\"],\n  \"categories\": [1, 3],\n  \"portfolio\": [\"https://example.com/img1.jpg\"],\n  \"verified\": true,\n  \"rating_avg\": 4.6\n}"
+            },
+            {
+              "name": "404 Not found",
+              "code": 404,
+              "body": "{\n  \"detail\": \"Provider profile not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve Provider (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/admin/provider/:id/approve", "host": ["{{base_url}}"], "path": ["admin", "provider", ":id", "approve"] },
+            "description": "Admin-only. Sets verified = true on the provider profile."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{\n  \"provider_id\": 55,\n  \"verified\": true\n}"
+            },
+            {
+              "name": "403 Forbidden",
+              "code": 403,
+              "body": "{\n  \"detail\": \"Admin access required\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Category",
+      "item": [
+        {
+          "name": "List Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/categories", "host": ["{{base_url}}"], "path": ["categories"] },
+            "description": "Public. Returns all service categories (seeded by Sajib, D2-T3)."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "[\n  { \"id\": 1, \"name\": \"Electrician\", \"icon\": \"electrician.svg\", \"base_price\": 300 },\n  { \"id\": 2, \"name\": \"Plumber\", \"icon\": \"plumber.svg\", \"base_price\": 250 }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Create Category (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/admin/categories", "host": ["{{base_url}}"], "path": ["admin", "categories"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"AC Repair\",\n  \"icon\": \"ac_repair.svg\",\n  \"base_price\": 400\n}"
+            },
+            "description": "Admin-only. Adds a new service category."
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "code": 201,
+              "body": "{ \"id\": 3, \"name\": \"AC Repair\", \"icon\": \"ac_repair.svg\", \"base_price\": 400 }"
+            }
+          ]
+        },
+        {
+          "name": "Update Category (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/admin/categories/:id", "host": ["{{base_url}}"], "path": ["admin", "categories", ":id"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"AC Repair & Service\",\n  \"base_price\": 450\n}"
+            },
+            "description": "Admin-only. Edits an existing category."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{ \"id\": 3, \"name\": \"AC Repair & Service\", \"icon\": \"ac_repair.svg\", \"base_price\": 450 }"
+            }
+          ]
+        },
+        {
+          "name": "Delete Category (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/admin/categories/:id", "host": ["{{base_url}}"], "path": ["admin", "categories", ":id"] },
+            "description": "Admin-only. Removes a category."
+          },
+          "response": [
+            { "name": "204 No Content", "code": 204, "body": "" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Booking",
+      "item": [
+        {
+          "name": "Create Booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/booking", "host": ["{{base_url}}"], "path": ["booking"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"client_id\": 101,\n  \"provider_id\": 55,\n  \"category_id\": 1,\n  \"scheduled_at\": \"2026-09-20T10:00:00Z\",\n  \"address\": \"House 12, Road 4, Netrokona\"\n}"
+            },
+            "description": "Creates a booking with status = \"requested\"."
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "code": 201,
+              "body": "{\n  \"booking_id\": 900,\n  \"status\": \"requested\",\n  \"client_id\": 101,\n  \"provider_id\": 55,\n  \"category_id\": 1,\n  \"scheduled_at\": \"2026-09-20T10:00:00Z\",\n  \"address\": \"House 12, Road 4, Netrokona\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Booking",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/booking/:id", "host": ["{{base_url}}"], "path": ["booking", ":id"] },
+            "description": "Returns full booking details. Used by the Flutter status-polling screen (D4-T6, every 5 seconds)."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{\n  \"booking_id\": 900,\n  \"status\": \"accepted\",\n  \"client_id\": 101,\n  \"provider_id\": 55,\n  \"category_id\": 1,\n  \"scheduled_at\": \"2026-09-20T10:00:00Z\",\n  \"address\": \"House 12, Road 4, Netrokona\",\n  \"payment_status\": \"unpaid\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Booking Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/booking/:id/status", "host": ["{{base_url}}"], "path": ["booking", ":id", "status"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"accepted\"\n}"
+            },
+            "description": "Provider-only. Valid transitions: requested → accepted → en_route → completed."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{ \"booking_id\": 900, \"status\": \"accepted\" }"
+            },
+            {
+              "name": "403 Not the assigned provider",
+              "code": 403,
+              "body": "{ \"detail\": \"Only the assigned provider can update this booking\" }"
+            }
+          ]
+        },
+        {
+          "name": "Get Price Estimate",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/booking/:id/estimate", "host": ["{{base_url}}"], "path": ["booking", ":id", "estimate"] },
+            "description": "Returns a price estimate based on the booking's category base_price."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{ \"booking_id\": 900, \"estimated_price\": 300, \"currency\": \"BDT\" }"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Review & Payment",
+      "item": [
+        {
+          "name": "Submit Review",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/booking/:id/review", "host": ["{{base_url}}"], "path": ["booking", ":id", "review"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 5,\n  \"comment\": \"Very professional, fixed it quickly.\"\n}"
+            },
+            "description": "Only allowed when the booking's status is \"completed\"."
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "code": 201,
+              "body": "{ \"review_id\": 40, \"booking_id\": 900, \"rating\": 5, \"comment\": \"Very professional, fixed it quickly.\" }"
+            },
+            {
+              "name": "400 Booking not completed",
+              "code": 400,
+              "body": "{ \"detail\": \"Booking must be completed before it can be reviewed\" }"
+            }
+          ]
+        },
+        {
+          "name": "Pay Booking (Simulated)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/booking/:id/pay", "host": ["{{base_url}}"], "path": ["booking", ":id", "pay"] },
+            "description": "Simulated payment for MVP-1 (no real payment gateway). Sets payment_status = paid."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{ \"booking_id\": 900, \"payment_status\": \"paid\" }"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "List Pending Providers",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/admin/providers/pending", "host": ["{{base_url}}"], "path": ["admin", "providers", "pending"] },
+            "description": "Admin-only. Feeds the Admin Panel's provider-approval list (D4-T5)."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "[\n  { \"provider_id\": 55, \"user_id\": 101, \"name\": \"Rahim Uddin\", \"submitted_at\": \"2026-09-16T12:00:00Z\" }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Admin Stats",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{base_url}}/admin/stats", "host": ["{{base_url}}"], "path": ["admin", "stats"] },
+            "description": "Admin-only. Basic counts for the admin dashboard."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "code": 200,
+              "body": "{ \"total_bookings\": 42, \"active_users\": 130, \"pending_providers\": 3 }"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
