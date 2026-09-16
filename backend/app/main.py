@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 from sqlalchemy.exc import SQLAlchemyError
 
+from app.routes.auth import router as auth_router
 from database import check_database_connection
 
 load_dotenv()
@@ -23,6 +24,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(auth_router)
 
 @app.get("/")
 async def root():
