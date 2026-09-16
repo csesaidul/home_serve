@@ -225,9 +225,9 @@ Run `git stash pop` later if you want your original (broken) changes back.
 
 | Member | Role |
 |---|---|
-| Member 1 | Lead Developer — Flutter architecture, FastAPI backend, auth & WebSocket logic, integration |
-| Member 2 | UI/UX & Frontend Support — Figma wireframes, static screens, manual testing |
-| Member 3 | Documentation & Database — MySQL schema, seed data, proposal/report writing |
+| [Saidul Islam](https://github.com/csesaidul/) | Lead Developer — Flutter architecture, FastAPI backend, auth & WebSocket logic, integration |
+| Sajib | UI/UX & Frontend Support — Figma wireframes, static screens, manual testing |
+| Rabbi | Documentation & Database — MySQL schema, seed data, proposal/report writing |
 
 ## Project Status
 
