@@ -60,7 +60,20 @@ See [`backend/README.md`](./backend/README.md) for database setup, migrations, a
 
 1. Start MySQL and Apache from the XAMPP control panel.
 2. Open phpMyAdmin and create a database (e.g. `homeserve_db`).
-3. Run the schema/seed scripts in `backend/db/` (see `backend/README.md`).
+3. Copy `backend/.env.example` to `backend/.env` and set `DATABASE_URL` for the local MySQL instance.
+4. From the `backend/` directory, apply the versioned schema migration:
+
+```bash
+alembic upgrade head
+```
+
+To roll back the most recent migration during development:
+
+```bash
+alembic downgrade -1
+```
+
+Service-category seed data is added separately by the category task; the initial migration creates the six core MVP tables only.
 
 ### 4. Frontend setup
 
