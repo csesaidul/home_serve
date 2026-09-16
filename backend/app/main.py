@@ -3,14 +3,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from pathlib import Path
+from sqlalchemy.exc import SQLAlchemyError
+
+from database import check_database_connection
 
 load_dotenv()
 
 app = FastAPI(
     title="HomeServe Backend API",
-    docs_url="./docs",
-    redoc_url="./redoc",
-    openapi_url="./openapi.json",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json",
 )
 
 app.add_middleware(
@@ -28,7 +31,12 @@ async def root():
 @app.get("/api/health")
 async def health():
     """Simple health-check endpoint used by the Flutter app on startup."""
-    return {"status": "ok"}
+    try:
+        check_database_connection()
+    except SQLAlchemyError as error:
+        return {"status": "error", "database": "unavailable", "detail": str(error)}
+
+    return {"status": "ok", "database": "connected"}
 
 if __name__ == "__main__":
     import uvicorn
