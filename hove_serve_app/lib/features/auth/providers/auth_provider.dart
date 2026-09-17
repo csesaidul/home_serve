@@ -22,10 +22,24 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>(
 );
 
 class AuthNotifier extends StateNotifier<AuthState> {
-  AuthNotifier(this._repository, this._storage) : super(const AuthState());
+  AuthNotifier(this._repository, this._storage) : super(const AuthState()) {
+    _restoreSession();
+  }
 
   final AuthRepository _repository;
   final SecureStorageService _storage;
+
+  Future<void> _restoreSession() async {
+    try {
+      final token = await _storage.readToken();
+      final claims = await _storage.readClaims();
+      if (token != null && claims != null) {
+        state = state.copyWith(status: AuthStatus.authenticated, claims: claims);
+      }
+    } on FormatException {
+      await _storage.clearSession();
+    }
+  }
 
   void clearError() => state = state.copyWith(clearError: true);
 
