@@ -42,9 +42,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           password: _passwordController.text,
         );
     if (ok && mounted) {
-      // TODO(D2-T5): route by claims (client_verified/provider_verified/is_admin)
-      // once the capability-based route guard lands. For now everyone lands
-      // on /home.
       context.go('/home');
     }
   }

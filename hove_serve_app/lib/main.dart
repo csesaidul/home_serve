@@ -9,11 +9,11 @@ void main() {
   runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final brightness = View.of(context).platformDispatcher.platformBrightness;
 
     TextTheme textTheme = createTextTheme(context, "Hind Siliguri", "Plus Jakarta Sans");
@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
       title: 'HomeServe',
       debugShowCheckedModeBanner: false,
       theme: brightness == Brightness.light ? theme.light() : theme.dark(),
-      routerConfig: appRouter,
+      routerConfig: ref.watch(appRouterProvider),
     );
   }
 }
