@@ -5,19 +5,73 @@
 
 # Python / FastAPI backend
 __pycache__/
-*.pyc
+*.py[cod]
 *.pyo
+*.pyd
 venv/
 .venv/
 env/
 *.egg-info/
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.sqlite3
+*.db
 
 # Backup / scratch files
 *copy*.py
 *.bak
 *.orig
+*.tmp
+*.temp
 
 # Uploaded user content
 backend/uploads/*
 !backend/uploads/.gitkeep
+
+# Flutter frontend
+hove_serve_app/.dart_tool/
+hove_serve_app/.flutter-plugins
+hove_serve_app/.flutter-plugins-dependencies
+hove_serve_app/.pub-cache/
+hove_serve_app/.pub/
+hove_serve_app/build/
+hove_serve_app/coverage/
+hove_serve_app/android/app/debug/
+hove_serve_app/android/app/profile/
+hove_serve_app/android/app/release/
+hove_serve_app/ios/Flutter/.last_build_id
+hove_serve_app/**/doc/api/
+
+# Miscellaneous
+*.class
+*.log
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code settings (optional: keep if you do not want them in Git)
+#.vscode/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Widget Preview related
+.widget_preview/
