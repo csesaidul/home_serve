@@ -1,11 +1,11 @@
 {
-    "name": "hove_serve_app",
-    "short_name": "hove_serve_app",
+    "name": "HomeServe",
+    "short_name": "HomeServe",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#B9E6F8",
+    "theme_color": "#126D85",
+    "description": "Find trusted home services with HomeServe.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
