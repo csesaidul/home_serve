@@ -124,7 +124,7 @@ def list_providers(
     total = db.execute(text(f"SELECT COUNT(*) FROM provider_profiles pp JOIN users u ON u.id = pp.user_id WHERE {where}"), params).scalar_one()
     rows = db.execute(
         text(f"""SELECT pp.user_id, u.name, pp.profile_photo, pp.categories, pp.skills, pp.location,
-            pp.rating_avg, pp.starting_price, pp.response_time, pp.job_success_pct,
+            pp.rating_avg, pp.starting_price, pp.response_time, pp.job_success_pct, pp.verified,
             CASE WHEN pp.response_time IS NULL THEN false ELSE true END AS available
             FROM provider_profiles pp JOIN users u ON u.id = pp.user_id
             WHERE {where} ORDER BY {order_by} LIMIT :limit OFFSET :offset"""),
@@ -161,9 +161,11 @@ def get_provider_portfolio(db: Session, user_id: int) -> list[dict]:
 
 def get_provider_reviews(db: Session, user_id: int) -> dict:
     rows = db.execute(
-        text("""SELECT r.id, r.rating, r.comment, r.created_at, u.name AS client_name
+        text("""SELECT r.id, r.rating, r.comment, r.created_at, u.name AS client_name,
+            cp.profile_photo AS client_profile_photo
             FROM reviews r JOIN bookings b ON b.id = r.booking_id
             JOIN users u ON u.id = b.client_id
+            LEFT JOIN client_profiles cp ON cp.user_id = b.client_id
             WHERE b.provider_id = :user_id ORDER BY r.created_at DESC"""),
         {"user_id": user_id},
     ).mappings().all()

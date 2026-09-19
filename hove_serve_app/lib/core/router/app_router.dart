@@ -8,7 +8,10 @@ import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/otp_verify_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
 import '../../features/auth/screens/splash_screen.dart';
+import '../../features/provider/screens/provider_home_screen.dart';
+import '../../features/provider/screens/provider_profile_screen.dart';
 import '../widgets/placeholder_screen.dart';
+import '../widgets/app_shell.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final refreshNotifier = _RouterRefreshNotifier();
@@ -36,9 +39,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (location == '/provider' && !_hasCapability(claims, 'provider_verified')) {
         return '/home';
       }
-      if (location == '/booking' && !_hasCapability(claims, 'client_verified')) {
-        return '/home';
-      }
       if (location == '/admin' && !_hasCapability(claims, 'is_admin')) {
         return '/home';
       }
@@ -61,17 +61,56 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/otp-verify',
         builder: (context, state) => OtpVerifyScreen(localPhone: state.extra as String? ?? ''),
       ),
-      GoRoute(
-        path: '/home',
-        builder: (context, state) => const PlaceholderScreen(title: 'Home'),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) => AppShell(navigationShell: navigationShell),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/home',
+                builder: (context, state) => const ProviderHomeScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/booking',
+                builder: (context, state) => const PlaceholderScreen(title: 'Bookings'),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/messages',
+                builder: (context, state) => const PlaceholderScreen(title: 'Messages'),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/profile',
+                builder: (context, state) => const PlaceholderScreen(title: 'Profile'),
+              ),
+            ],
+          ),
+        ],
       ),
       GoRoute(
-        path: '/booking',
-        builder: (context, state) => const PlaceholderScreen(title: 'Booking'),
+        path: '/provider/:userId',
+        builder: (context, state) => ProviderProfileScreen(
+          userId: int.parse(state.pathParameters['userId']!),
+        ),
       ),
       GoRoute(
         path: '/provider',
-        builder: (context, state) => const PlaceholderScreen(title: 'Provider'),
+        redirect: (context, state) => '/provider/3',
+      ),
+      GoRoute(
+        path: '/provider-profile',
+        redirect: (context, state) => '/provider',
       ),
       GoRoute(
         path: '/admin',
@@ -83,7 +122,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
 String _defaultAuthenticatedRoute(Map<String, dynamic> claims) {
   if (_hasCapability(claims, 'is_admin')) return '/admin';
-  if (_hasCapability(claims, 'provider_verified')) return '/provider';
   return '/home';
 }
 
