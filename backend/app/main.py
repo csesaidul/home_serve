@@ -8,9 +8,14 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.routes.auth import router as auth_router
 from app.routes.booking import router as booking_router
 from app.routes.provider import router as provider_router
+from app.routes.profile import router as profile_router
 from database import check_database_connection
 
 load_dotenv()
+
+STATIC_DIR = Path(__file__).resolve().parent / "static"
+STATIC_DIR.mkdir(exist_ok=True)
+ASSETS_DIR = Path(__file__).resolve().parent.parent / "assets"
 
 app = FastAPI(
     title="HomeServe Backend API",
@@ -27,8 +32,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+app.mount("/assets", StaticFiles(directory=ASSETS_DIR), name="assets")
+
 app.include_router(auth_router)
 app.include_router(provider_router)
+app.include_router(profile_router)
 app.include_router(booking_router)
 
 @app.get("/")

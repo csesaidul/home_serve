@@ -84,6 +84,59 @@ python app/main.py
 
 The API is available at <http://localhost:8000>.
 
+## Load Demo Provider Data
+
+The repository includes the profile photos in `assets/profile_photos` and a rerunnable
+seed script for the provider, client, and portfolio screens. Apply migrations first,
+then run:
+
+```powershell
+python seed_data.py
+```
+
+The script creates 3 client accounts, 10 provider accounts, and 6 portfolio items.
+Every demo account uses the password `homeserve-demo`.
+
+### Demo Login Credentials
+
+Use the phone number as the `phone` value for `/auth/login`:
+
+| User ID | Role | Phone |
+| ---: | --- | --- |
+| 101 | Client - Nusrat Jahan | `+8801700000101` |
+| 102 | Client - Farhan Tanvir | `+8801700000102` |
+| 103 | Client - Maliha Rahman | `+8801700000103` |
+| 201 | Provider - Rahul Hassan | `+8801800000201` |
+| 202 | Provider - Master Rahim C. | `+8801800000202` |
+| 203 | Provider - Priya Sen | `+8801800000203` |
+| 204 | Provider - Tanvir Alam | `+8801800000204` |
+| 205 | Provider - Ava Morgan | `+8801800000205` |
+| 206 | Provider - Sofia Karim | `+8801800000206` |
+| 207 | Provider - Rahim Uddin | `+8801800000207` |
+| 208 | Provider - Maya Chen | `+8801800000208` |
+| 209 | Provider - John Smith | `+8801800000209` |
+| 210 | Provider - Priya Ahmed | `+8801800000210` |
+
+Password for all accounts: `homeserve-demo`.
+Photos are available from `/assets/profile_photos/...` while the API is running.
+
+## Provider Screen APIs
+
+The provider discovery and profile mockups use these endpoints:
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /providers?category=Electrician&sort=rating` | Provider list with search, price, availability, pagination, and sort filters |
+| `GET /providers/{user_id}` | Full verified provider profile with portfolio and reviews |
+| `GET /providers/{user_id}/portfolio` | Portfolio cards for the provider detail screen |
+| `GET /providers/{user_id}/reviews` | Customer reviews for the provider detail screen |
+| `GET /client/profile/{user_id}` | Client profile data |
+| `PATCH /client/profile/{user_id}` | Update client profile data |
+
+Supported provider sort values are `rating`, `nearest`, `price_low`, and `price_high`.
+Use `available_only=true`, `min_price`, `max_price`, `search`, `limit`, and `offset`
+as optional query parameters on `/providers`.
+
 ## Verify the Server
 
 Open these URLs in a browser, or use them from another client:
