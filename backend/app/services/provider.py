@@ -86,6 +86,14 @@ def get_categories(db: Session) -> list[dict]:
     return [dict(row) for row in rows]
 
 
+def get_category_by_id(db: Session, category_id: int) -> dict | None:
+    row = db.execute(
+        text("SELECT id, name, icon, base_price FROM service_categories WHERE id = :id"),
+        {"id": category_id},
+    ).mappings().first()
+    return dict(row) if row else None
+
+
 def create_category(db: Session, name: str, icon: str | None, base_price: float) -> dict:
     existing = db.execute(
         text("SELECT id, name, icon, base_price FROM service_categories WHERE name = :name"),
@@ -102,8 +110,53 @@ def create_category(db: Session, name: str, icon: str | None, base_price: float)
     )
     db.commit()
     category_id = result.lastrowid
-    row = db.execute(
-        text("SELECT id, name, icon, base_price FROM service_categories WHERE id = :id"),
+    return get_category_by_id(db, category_id) or {}
+
+
+def update_category(db: Session, category_id: int, name: str, icon: str | None, base_price: float) -> dict | None:
+    existing = get_category_by_id(db, category_id)
+    if existing is None:
+        return None
+
+    db.execute(
+        text(
+            "UPDATE service_categories SET name = :name, icon = :icon, base_price = :base_price WHERE id = :id"
+        ),
+        {"id": category_id, "name": name, "icon": icon, "base_price": base_price},
+    )
+    db.commit()
+    return get_category_by_id(db, category_id)
+
+
+def delete_category(db: Session, category_id: int) -> bool:
+    result = db.execute(
+        text("DELETE FROM service_categories WHERE id = :id"),
         {"id": category_id},
-    ).mappings().first()
-    return dict(row)
+    )
+    db.commit()
+    return result.rowcount > 0
+
+
+def get_admin_stats(db: Session) -> dict:
+    total_bookings = db.execute(text("SELECT COUNT(*) FROM bookings")).scalar() or 0
+    active_users = db.execute(
+        text(
+            "SELECT COUNT(DISTINCT user_id) FROM ( "
+            "SELECT client_id AS user_id FROM bookings "
+            "UNION ALL "
+            "SELECT provider_id AS user_id FROM bookings "
+            "UNION ALL "
+            "SELECT user_id FROM client_profiles "
+            "UNION ALL "
+            "SELECT user_id FROM provider_profiles "
+            ")"
+        )
+    ).scalar() or 0
+    pending_providers = db.execute(
+        text("SELECT COUNT(*) FROM provider_profiles WHERE verified = false OR status = 'pending'")
+    ).scalar() or 0
+    return {
+        "total_bookings": int(total_bookings),
+        "active_users": int(active_users),
+        "pending_providers": int(pending_providers),
+    }

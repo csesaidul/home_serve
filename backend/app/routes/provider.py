@@ -9,9 +9,12 @@ from app.schemas.provider import CategoryCreate, ProviderProfileCreate
 from app.services.provider import (
     approve_provider,
     create_category,
+    delete_category,
+    get_admin_stats,
     get_categories,
     get_provider_profile,
     list_pending_providers,
+    update_category,
     upsert_provider_profile,
 )
 from database import get_db
@@ -94,6 +97,22 @@ def add_category(payload: CategoryCreate, db: Session = Depends(get_db)):
     return category
 
 
+@router.put("/admin/categories/{category_id}")
+def update_category_endpoint(category_id: int, payload: CategoryCreate, db: Session = Depends(get_db)):
+    category = update_category(db, category_id, payload.name, payload.icon, payload.base_price)
+    if category is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
+    return category
+
+
+@router.delete("/admin/categories/{category_id}")
+def delete_category_endpoint(category_id: int, db: Session = Depends(get_db)):
+    deleted = delete_category(db, category_id)
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
+    return {"deleted": True, "id": category_id}
+
+
 @router.post("/admin/provider/{user_id}/approve")
 def approve_provider_profile(user_id: int, db: Session = Depends(get_db)):
     profile = approve_provider(db, user_id)
@@ -105,3 +124,8 @@ def approve_provider_profile(user_id: int, db: Session = Depends(get_db)):
 @router.get("/admin/providers/pending")
 def pending_providers(db: Session = Depends(get_db)):
     return {"items": list_pending_providers(db), "count": len(list_pending_providers(db))}
+
+
+@router.get("/admin/stats")
+def admin_stats(db: Session = Depends(get_db)):
+    return get_admin_stats(db)
