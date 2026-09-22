@@ -255,6 +255,10 @@ def test_booking_flow():
     assert response.status_code == 200, response.text
     booking_id = response.json()["id"]
 
+    bookings = client.get("/booking", params={"client_id": client_id})
+    assert bookings.status_code == 200, bookings.text
+    assert bookings.json()["items"][0]["id"] == booking_id
+
     response = client.get(f"/booking/{booking_id}")
     assert response.status_code == 200, response.text
     assert response.json()["status"] == "requested"

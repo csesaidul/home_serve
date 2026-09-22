@@ -48,6 +48,23 @@ def get_booking_by_id(db: Session, booking_id: int) -> dict | None:
     return dict(row) if row else None
 
 
+def list_bookings_for_client(db: Session, client_id: int) -> list[dict]:
+    rows = db.execute(
+        text(
+            "SELECT b.id, b.provider_id, b.category_id, c.name AS category_name, "
+            "u.name AS provider_name, b.status, b.scheduled_at, b.address, "
+            "b.price_estimate, b.payment_status, b.customer_notes "
+            "FROM bookings b "
+            "JOIN service_categories c ON c.id = b.category_id "
+            "JOIN users u ON u.id = b.provider_id "
+            "WHERE b.client_id = :client_id "
+            "ORDER BY b.scheduled_at DESC, b.id DESC"
+        ),
+        {"client_id": client_id},
+    ).mappings().all()
+    return [dict(row) for row in rows]
+
+
 def update_booking_status(db: Session, booking_id: int, next_status: str) -> dict | None:
     current = db.execute(
         text("SELECT status FROM bookings WHERE id = :booking_id"),

@@ -10,6 +10,8 @@ import '../../features/auth/screens/register_screen.dart';
 import '../../features/auth/screens/splash_screen.dart';
 import '../../features/provider/screens/provider_home_screen.dart';
 import '../../features/provider/screens/provider_profile_screen.dart';
+import '../../features/provider/models/provider_models.dart';
+import '../../features/booking/screens/booking_screen.dart';
 import '../widgets/placeholder_screen.dart';
 import '../widgets/app_shell.dart';
 
@@ -25,8 +27,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final authState = ref.read(authProvider);
       final claims = authState.claims;
       final location = state.matchedLocation;
-      final isPublicRoute =
-          location == '/splash' ||
+      final isPublicRoute = location == '/splash' ||
           location == '/login' ||
           location == '/register' ||
           location == '/otp-verify';
@@ -36,7 +37,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
 
       if (isPublicRoute) return _defaultAuthenticatedRoute(claims);
-      if (location == '/provider' && !_hasCapability(claims, 'provider_verified')) {
+      if (location == '/provider' &&
+          !_hasCapability(claims, 'provider_verified')) {
         return '/home';
       }
       if (location == '/admin' && !_hasCapability(claims, 'is_admin')) {
@@ -51,7 +53,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/login',
-        builder: (context, state) => LoginScreen(prefillPhone: state.extra as String?),
+        builder: (context, state) =>
+            LoginScreen(prefillPhone: state.extra as String?),
       ),
       GoRoute(
         path: '/register',
@@ -59,10 +62,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/otp-verify',
-        builder: (context, state) => OtpVerifyScreen(localPhone: state.extra as String? ?? ''),
+        builder: (context, state) =>
+            OtpVerifyScreen(localPhone: state.extra as String? ?? ''),
       ),
       StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) => AppShell(navigationShell: navigationShell),
+        builder: (context, state, navigationShell) =>
+            AppShell(navigationShell: navigationShell),
         branches: [
           StatefulShellBranch(
             routes: [
@@ -76,7 +81,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/booking',
-                builder: (context, state) => const PlaceholderScreen(title: 'Bookings'),
+                builder: (context, state) =>
+                    const PlaceholderScreen(title: 'Bookings'),
               ),
             ],
           ),
@@ -84,7 +90,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/messages',
-                builder: (context, state) => const PlaceholderScreen(title: 'Messages'),
+                builder: (context, state) =>
+                    const PlaceholderScreen(title: 'Messages'),
               ),
             ],
           ),
@@ -92,7 +99,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/profile',
-                builder: (context, state) => const PlaceholderScreen(title: 'Profile'),
+                builder: (context, state) =>
+                    const PlaceholderScreen(title: 'Profile'),
               ),
             ],
           ),
@@ -102,6 +110,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/provider/:userId',
         builder: (context, state) => ProviderProfileScreen(
           userId: int.parse(state.pathParameters['userId']!),
+        ),
+      ),
+      GoRoute(
+        path: '/booking/new',
+        builder: (context, state) => BookingScreen(
+          provider: state.extra as ProviderProfileItem,
         ),
       ),
       GoRoute(

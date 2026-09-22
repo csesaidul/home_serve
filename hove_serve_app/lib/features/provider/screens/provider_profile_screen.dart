@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/constants.dart';
 import '../data/provider_repository.dart';
@@ -22,7 +23,8 @@ class ProviderProfileScreen extends ConsumerWidget {
       body: SafeArea(
         child: profileAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, __) => const Center(child: Text('Unable to load provider profile')),
+          error: (_, __) =>
+              const Center(child: Text('Unable to load provider profile')),
           data: (profile) => _ProviderProfileContent(profile: profile),
         ),
       ),
@@ -38,7 +40,11 @@ class _ProviderProfileContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final skills = profile.skills.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+    final skills = profile.skills
+        .split(',')
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
 
     return Scaffold(
       body: SafeArea(
@@ -56,9 +62,15 @@ class _ProviderProfileContent extends StatelessWidget {
                       icon: const Icon(Icons.arrow_back_ios_new_rounded),
                     ),
                     const Spacer(),
-                    IconButton(onPressed: () {}, icon: const Icon(Icons.favorite_border_rounded)),
-                    IconButton(onPressed: () {}, icon: const Icon(Icons.share_rounded)),
-                    IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert_rounded)),
+                    IconButton(
+                        onPressed: () {},
+                        icon: const Icon(Icons.favorite_border_rounded)),
+                    IconButton(
+                        onPressed: () {},
+                        icon: const Icon(Icons.share_rounded)),
+                    IconButton(
+                        onPressed: () {},
+                        icon: const Icon(Icons.more_vert_rounded)),
                   ],
                 ),
               ),
@@ -85,7 +97,8 @@ class _ProviderProfileContent extends StatelessWidget {
                           ? Center(
                               child: Text(
                                 _initials(profile.name),
-                                style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w700),
+                                style: const TextStyle(
+                                    fontSize: 34, fontWeight: FontWeight.w700),
                               ),
                             )
                           : Image.network(
@@ -98,38 +111,46 @@ class _ProviderProfileContent extends StatelessWidget {
                               errorBuilder: (_, __, ___) => Center(
                                 child: Text(
                                   _initials(profile.name),
-                                  style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w700),
+                                  style: const TextStyle(
+                                      fontSize: 34,
+                                      fontWeight: FontWeight.w700),
                                 ),
+                              ),
                             ),
-                      ),
                     ),
                     const SizedBox(height: 18),
                     Text(
                       profile.name,
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
+                      style:
+                          Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                fontWeight: FontWeight.w800,
+                              ),
                     ),
                     const SizedBox(height: 10),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
                         color: const Color(0xffeaf8f1),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: const Text(
                         'Verified Specialist',
-                        style: TextStyle(color: Color(0xff0d7a5d), fontWeight: FontWeight.w700),
+                        style: TextStyle(
+                            color: Color(0xff0d7a5d),
+                            fontWeight: FontWeight.w700),
                       ),
                     ),
                     const SizedBox(height: 18),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.star_rounded, color: Color(0xfff2b443), size: 20),
+                        const Icon(Icons.star_rounded,
+                            color: Color(0xfff2b443), size: 20),
                         Text(
                           ' ${profile.ratingAvg.toStringAsFixed(1)} (${profile.reviews.length} reviews)',
-                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w700, fontSize: 15),
                         ),
                         const SizedBox(width: 8),
                         Text(
@@ -146,14 +167,17 @@ class _ProviderProfileContent extends StatelessWidget {
                       children: skills
                           .map(
                             (skill) => Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 7),
                               decoration: BoxDecoration(
                                 color: const Color(0xffedf4f5),
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               child: Text(
                                 skill,
-                                style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xff3a4d5d)),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xff3a4d5d)),
                               ),
                             ),
                           )
@@ -161,7 +185,8 @@ class _ProviderProfileContent extends StatelessWidget {
                     ),
                     const SizedBox(height: 22),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 18, vertical: 18),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(18),
@@ -176,9 +201,15 @@ class _ProviderProfileContent extends StatelessWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          _StatColumn(label: 'Completed', value: '${profile.jobSuccessPct} Jobs'),
-                          _StatColumn(label: 'Rating', value: '${profile.ratingAvg.toStringAsFixed(1)} ★'),
-                          _StatColumn(label: 'Response', value: profile.responseTime),
+                          _StatColumn(
+                              label: 'Completed',
+                              value: '${profile.jobSuccessPct} Jobs'),
+                          _StatColumn(
+                              label: 'Rating',
+                              value:
+                                  '${profile.ratingAvg.toStringAsFixed(1)} ★'),
+                          _StatColumn(
+                              label: 'Response', value: profile.responseTime),
                         ],
                       ),
                     ),
@@ -209,10 +240,13 @@ class _ProviderProfileContent extends StatelessWidget {
                       height: 520,
                       child: TabBarView(
                         children: [
-                          SingleChildScrollView(child: _AboutTab(content: profile.bio)),
+                          SingleChildScrollView(
+                              child: _AboutTab(content: profile.bio)),
                           SingleChildScrollView(child: _ServicesTab()),
-                          SingleChildScrollView(child: _PortfolioTab(items: profile.portfolio)),
-                          SingleChildScrollView(child: _ReviewsTab(items: profile.reviews)),
+                          SingleChildScrollView(
+                              child: _PortfolioTab(items: profile.portfolio)),
+                          SingleChildScrollView(
+                              child: _ReviewsTab(items: profile.reviews)),
                         ],
                       ),
                     ),
@@ -223,19 +257,22 @@ class _ProviderProfileContent extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () => context.push('/booking/new', extra: profile),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xff0f7b99),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 18),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
                   ),
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.calendar_month_rounded),
                       SizedBox(width: 8),
-                      Text('Book Now', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                      Text('Book Now',
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.w700)),
                     ],
                   ),
                 ),
@@ -266,7 +303,8 @@ class _StatColumn extends StatelessWidget {
       children: [
         Text(
           label.toUpperCase(),
-          style: const TextStyle(fontSize: 12, color: Color(0xff587186), letterSpacing: 0.5),
+          style: const TextStyle(
+              fontSize: 12, color: Color(0xff587186), letterSpacing: 0.5),
         ),
         const SizedBox(height: 8),
         Text(
@@ -288,11 +326,16 @@ class _AboutTab extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('About Technician', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
+        const Text('About Technician',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
         const SizedBox(height: 12),
-        Text(content, style: const TextStyle(fontSize: 16, height: 1.6, color: Color(0xff465a69))),
+        Text(content,
+            style: const TextStyle(
+                fontSize: 16, height: 1.6, color: Color(0xff465a69))),
         const SizedBox(height: 18),
-        const Text('CORE SKILLS & EQUIPMENT', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, letterSpacing: 0.8)),
+        const Text('CORE SKILLS & EQUIPMENT',
+            style: TextStyle(
+                fontSize: 14, fontWeight: FontWeight.w800, letterSpacing: 0.8)),
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,
@@ -329,7 +372,8 @@ class _ServicesTab extends StatelessWidget {
     return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Services & Rates', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+        Text('Services & Rates',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
         SizedBox(height: 20),
         _PricingRow(label: 'Circuit Breaker', value: '৳ 1,200'),
         _PricingRow(label: 'Ceiling Fan Fitting', value: '৳ 800'),
@@ -350,7 +394,8 @@ class _PortfolioTab extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Recent Work & Portfolio', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+        const Text('Recent Work & Portfolio',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
         const SizedBox(height: 16),
         Row(
           children: items
@@ -365,9 +410,13 @@ class _PortfolioTab extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
-                        const Icon(Icons.flash_on_rounded, color: Colors.white, size: 30),
+                        const Icon(Icons.flash_on_rounded,
+                            color: Colors.white, size: 30),
                         const SizedBox(height: 8),
-                        Text(item.title, style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.white)),
+                        Text(item.title,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white)),
                       ],
                     ),
                   ),
@@ -413,10 +462,13 @@ class _ReviewItem extends StatelessWidget {
             _ReviewerAvatar(review: review),
             const SizedBox(width: 10),
             Expanded(
-              child: Text(review.clientName, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+              child: Text(review.clientName,
+                  style: const TextStyle(
+                      fontSize: 17, fontWeight: FontWeight.w700)),
             ),
             const Spacer(),
-            const Text('Verified', style: TextStyle(fontSize: 12, color: Color(0xff587186))),
+            const Text('Verified',
+                style: TextStyle(fontSize: 12, color: Color(0xff587186))),
           ],
         ),
         const SizedBox(height: 6),
@@ -425,13 +477,16 @@ class _ReviewItem extends StatelessWidget {
             5,
             (i) => Icon(
               Icons.star_rounded,
-              color: i < review.rating ? const Color(0xfff4b63d) : const Color(0xffd7dfe8),
+              color: i < review.rating
+                  ? const Color(0xfff4b63d)
+                  : const Color(0xffd7dfe8),
               size: 16,
             ),
           ),
         ),
         const SizedBox(height: 8),
-        Text(review.comment, style: const TextStyle(height: 1.5, color: Color(0xff495b68))),
+        Text(review.comment,
+            style: const TextStyle(height: 1.5, color: Color(0xff495b68))),
       ],
     );
   }
@@ -457,7 +512,8 @@ class _ReviewerAvatar extends StatelessWidget {
           : Image.network(
               '${AppConstants.apiBaseUrl}${review.profilePhoto}',
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Center(child: Text(_initials(review.clientName))),
+              errorBuilder: (_, __, ___) =>
+                  Center(child: Text(_initials(review.clientName))),
             ),
     );
   }
@@ -482,7 +538,9 @@ class _PricingRow extends StatelessWidget {
       child: Row(
         children: [
           Expanded(child: Text(label, style: const TextStyle(fontSize: 16))),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w700, color: Color(0xff0d7a9d))),
+          Text(value,
+              style: const TextStyle(
+                  fontWeight: FontWeight.w700, color: Color(0xff0d7a9d))),
         ],
       ),
     );

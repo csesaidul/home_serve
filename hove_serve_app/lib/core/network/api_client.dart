@@ -73,10 +73,34 @@ class ApiClient {
     }
   }
 
+  Future<Map<String, dynamic>> patch(
+    String path,
+    Map<String, dynamic> body, {
+    String? token,
+  }) async {
+    try {
+      final response = await _client
+          .patch(
+            _uri(path),
+            headers: _headers(token: token),
+            body: jsonEncode(body),
+          )
+          .timeout(AppConstants.apiTimeout);
+      return _decode(response);
+    } on SocketException {
+      throw ApiException(
+        "Server-এর সাথে যোগাযোগ করা যাচ্ছে না। ইন্টারনেট/সার্ভার চেক করো।",
+      );
+    } on HttpException {
+      throw ApiException("Unexpected server response.");
+    } on FormatException {
+      throw ApiException("সার্ভার থেকে ভুল ফরম্যাটের ডেটা এসেছে।");
+    }
+  }
+
   Map<String, dynamic> _decode(http.Response response) {
     final isJson =
-        response.headers["content-type"]?.contains("application/json") ??
-            false;
+        response.headers["content-type"]?.contains("application/json") ?? false;
     final dynamic decoded =
         response.body.isEmpty ? <String, dynamic>{} : jsonDecode(response.body);
 
@@ -87,7 +111,9 @@ class ApiClient {
 
     // FastAPI error shape: {"detail": "..."} or {"detail": [{"msg": "..."}]}
     String message = "Something went wrong (${response.statusCode}).";
-    if (isJson && decoded is Map<String, dynamic> && decoded["detail"] != null) {
+    if (isJson &&
+        decoded is Map<String, dynamic> &&
+        decoded["detail"] != null) {
       final detail = decoded["detail"];
       if (detail is String) {
         message = detail;

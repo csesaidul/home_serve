@@ -12,12 +12,18 @@ from app.services.booking import (
     get_booking_estimate,
     get_booking_progress,
     get_booking_summary,
+    list_bookings_for_client,
     update_booking_status,
 )
 from database import get_db
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["booking"])
+
+
+@router.get("/booking")
+def list_client_bookings(client_id: int = Query(...), db: Session = Depends(get_db)):
+    return {"items": list_bookings_for_client(db, client_id)}
 
 
 @router.post("/booking")
