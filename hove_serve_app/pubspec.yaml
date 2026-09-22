@@ -1,0 +1,48 @@
+name: homeserve_app
+description: "HomeServe — home services finder app (client + provider)."
+publish_to: "none"
+version: 0.1.0
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # Fonts / theme (already used by core/theme.dart + core/util.dart)
+  google_fonts: ^6.2.1
+
+  # D1-T5 skeleton deps
+  go_router: ^14.2.0
+  flutter_riverpod: ^2.5.1
+  flutter_secure_storage: ^9.2.2
+
+  # D2-T4: talk to Rabbi's FastAPI /auth endpoints
+  http: ^1.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.14.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/app_icon.png
+
+# Generates the real home-screen app icon from the same PNG used in
+# BrandHeader, so the launcher icon matches the mockup exactly.
+# Run: flutter pub run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/images/app_icon.png"
+  min_sdk_android: 23
+  web:
+    generate: true
+    image_path: "assets/images/app_icon.png"
+

@@ -1,0 +1,40 @@
+{
+  "categories": [
+    {
+      "id": 1,
+      "name": "Electrician",
+      "icon": "/assets/icons/electrician.png",
+      "base_price": 300
+    },
+    {
+      "id": 2,
+      "name": "Plumber",
+      "icon": "/assets/icons/plumber.png",
+      "base_price": 350
+    },
+    {
+      "id": 3,
+      "name": "AC Repair",
+      "icon": "/assets/icons/ac_repair.png",
+      "base_price": 500
+    },
+    {
+      "id": 4,
+      "name": "Cleaning",
+      "icon": "/assets/icons/cleaning.png",
+      "base_price": 250
+    },
+    {
+      "id": 5,
+      "name": "Tutor",
+      "icon": "/assets/icons/tutor.png",
+      "base_price": 400
+    },
+    {
+      "id": 6,
+      "name": "Carpenter",
+      "icon": "/assets/icons/carpenter.png",
+      "base_price": 300
+    }
+  ]
+}
