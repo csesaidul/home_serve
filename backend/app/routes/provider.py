@@ -5,9 +5,11 @@ from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Query, Request, UploadFile, status
 from jose import jwt, JWTError
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.schemas.provider import CategoryCreate, ProviderProfileCreate
+from app.schemas.account import ReviewCreate
+from app.schemas.provider import CategoryCreate, ProviderApplicationUpdate, ProviderProfileCreate, PortfolioItemCreate
 from app.services.provider import (
     approve_provider,
     create_category,
@@ -19,6 +21,8 @@ from app.services.provider import (
     get_provider_screen_profile,
     list_providers,
     upsert_provider_profile,
+    create_portfolio_item, delete_portfolio_item, get_provider_application,
+    get_provider_dashboard, submit_provider_application,
 )
 from database import get_db
 
@@ -93,6 +97,66 @@ def get_provider_profile_by_user_id(user_id: int, db: Session = Depends(get_db))
     if profile is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Provider profile not found")
     return profile
+
+
+@router.get("/provider/application/{user_id}")
+def provider_application(user_id: int, db: Session = Depends(get_db)):
+    application = get_provider_application(db, user_id)
+    if application is None:
+        raise HTTPException(status_code=404, detail="Provider application not found")
+    return application
+
+
+@router.patch("/provider/application/{user_id}")
+def update_provider_application(user_id: int, payload: ProviderApplicationUpdate, db: Session = Depends(get_db)):
+    profile = upsert_provider_profile(db, user_id, payload.bio, payload.skills, payload.categories, None)
+    db.execute(text("""UPDATE provider_profiles SET profile_photo = COALESCE(:profile_photo, profile_photo),
+        location = COALESCE(:location, location), years_experience = COALESCE(:years_experience, years_experience),
+        trade_certificate_url = COALESCE(:trade_certificate_url, trade_certificate_url) WHERE user_id = :user_id"""),
+        {"user_id": user_id, "profile_photo": payload.profile_photo, "location": payload.location, "years_experience": payload.years_experience, "trade_certificate_url": payload.trade_certificate_url})
+    db.commit()
+    return get_provider_application(db, user_id) or profile
+
+
+@router.post("/provider/application/{user_id}/submit")
+def submit_application(user_id: int, db: Session = Depends(get_db)):
+    result = submit_provider_application(db, user_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Provider application not found")
+    return result
+
+
+@router.get("/provider/dashboard/{user_id}")
+def provider_dashboard(user_id: int, db: Session = Depends(get_db)):
+    result = get_provider_dashboard(db, user_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Provider profile not found")
+    return result
+
+
+@router.post("/provider/{user_id}/portfolio", status_code=status.HTTP_201_CREATED)
+def add_portfolio_item(user_id: int, payload: PortfolioItemCreate, db: Session = Depends(get_db)):
+    return create_portfolio_item(db, user_id, payload.title, payload.description, payload.image_url, payload.category)
+
+
+@router.delete("/provider/{user_id}/portfolio/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+def remove_portfolio_item(user_id: int, item_id: int, db: Session = Depends(get_db)):
+    if not delete_portfolio_item(db, user_id, item_id):
+        raise HTTPException(status_code=404, detail="Portfolio item not found")
+
+
+@router.post("/client/{client_id}/bookings/{booking_id}/review", status_code=status.HTTP_201_CREATED)
+def review_completed_booking(client_id: int, booking_id: int, payload: ReviewCreate, db: Session = Depends(get_db)):
+    from app.services.provider import create_review
+
+    try:
+        review = create_review(db, booking_id, client_id, payload.rating, payload.comment)
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="A review may already exist for this booking") from exc
+    if review is None:
+        raise HTTPException(status_code=400, detail="Only completed bookings owned by the client can be reviewed")
+    return review
 
 
 @router.get("/providers")

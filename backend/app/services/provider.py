@@ -59,6 +59,61 @@ def get_provider_profile(db: Session, user_id: int) -> dict | None:
     return dict(row) if row else None
 
 
+def get_provider_application(db: Session, user_id: int) -> dict | None:
+    row = db.execute(text("""SELECT pp.user_id, u.name, u.phone, pp.bio, pp.skills,
+        pp.categories, pp.portfolio, pp.profile_photo, pp.location, pp.years_experience,
+        pp.trade_certificate_url, pp.status, pp.verified, pp.id_verification_status,
+        pp.submitted_at, pp.rejection_reason FROM provider_profiles pp
+        JOIN users u ON u.id = pp.user_id WHERE pp.user_id = :user_id"""),
+        {"user_id": user_id}).mappings().first()
+    return dict(row) if row else None
+
+
+def submit_provider_application(db: Session, user_id: int) -> dict | None:
+    result = db.execute(text("""UPDATE provider_profiles SET status = 'submitted',
+        id_verification_status = 'pending', submitted_at = CURRENT_TIMESTAMP
+        WHERE user_id = :user_id"""), {"user_id": user_id})
+    db.commit()
+    if result.rowcount != 1:
+        return None
+    return get_provider_application(db, user_id)
+
+
+def get_provider_dashboard(db: Session, user_id: int) -> dict | None:
+    profile = get_provider_application(db, user_id)
+    if profile is None:
+        return None
+    stats = db.execute(text("""SELECT COUNT(*) AS total_jobs,
+        SUM(CASE WHEN status = 'requested' THEN 1 ELSE 0 END) AS pending_jobs,
+        SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) AS completed_jobs,
+        COALESCE(SUM(CASE WHEN payment_status = 'paid' THEN price_estimate ELSE 0 END), 0) AS earnings
+        FROM bookings WHERE provider_id = :user_id"""), {"user_id": user_id}).mappings().one()
+    return {"profile": profile, "stats": dict(stats)}
+
+
+def create_portfolio_item(db: Session, user_id: int, title: str, description: str | None, image_url: str, category: str | None) -> dict:
+    result = db.execute(text("""INSERT INTO portfolio_items (provider_id, title, description, image_url, category)
+        VALUES (:user_id, :title, :description, :image_url, :category)"""),
+        {"user_id": user_id, "title": title, "description": description, "image_url": image_url, "category": category})
+    db.commit()
+    return dict(db.execute(text("SELECT id, provider_id, title, description, image_url, category, completed_at, sort_order FROM portfolio_items WHERE id = :id"), {"id": result.lastrowid}).mappings().one())
+
+
+def delete_portfolio_item(db: Session, user_id: int, item_id: int) -> bool:
+    result = db.execute(text("DELETE FROM portfolio_items WHERE id = :item_id AND provider_id = :user_id"), {"item_id": item_id, "user_id": user_id})
+    db.commit()
+    return result.rowcount == 1
+
+
+def create_review(db: Session, booking_id: int, client_id: int, rating: int, comment: str | None) -> dict | None:
+    booking = db.execute(text("SELECT provider_id, status FROM bookings WHERE id = :booking_id AND client_id = :client_id"), {"booking_id": booking_id, "client_id": client_id}).mappings().first()
+    if booking is None or booking["status"] != "completed":
+        return None
+    result = db.execute(text("INSERT INTO reviews (booking_id, rating, comment) VALUES (:booking_id, :rating, :comment)"), {"booking_id": booking_id, "rating": rating, "comment": comment})
+    db.commit()
+    return dict(db.execute(text("SELECT id, booking_id, rating, comment, created_at FROM reviews WHERE id = :id"), {"id": result.lastrowid}).mappings().one())
+
+
 def list_pending_providers(db: Session) -> list[dict]:
     rows = db.execute(
         text(
