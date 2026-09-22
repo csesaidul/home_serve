@@ -98,6 +98,7 @@ def create_tables():
                     address VARCHAR(500) NOT NULL,
                     price_estimate NUMERIC(10,2),
                     payment_status VARCHAR(20) NOT NULL DEFAULT 'unpaid',
+                    customer_notes TEXT,
                     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                 )
                 """
@@ -247,6 +248,7 @@ def test_booking_flow():
             "category_id": 1,
             "scheduled_at": "2026-09-20T10:00:00",
             "address": "123 Main St",
+            "customer_notes": "Main circuit breaker keeps tripping under load in",
         },
         headers=client_headers,
     )
@@ -260,6 +262,18 @@ def test_booking_flow():
     estimate = client.get(f"/booking/{booking_id}/estimate")
     assert estimate.status_code == 200, estimate.text
     assert estimate.json()["estimated_price"] == 200.0
+
+    summary = client.get(f"/booking/{booking_id}/summary")
+    assert summary.status_code == 200, summary.text
+    assert summary.json()["payment"]["estimated_total"] == 250.0
+
+    progress = client.get(f"/booking/{booking_id}/progress")
+    assert progress.status_code == 200, progress.text
+    assert len(progress.json()["steps"]) >= 3
+
+    confirm = client.post(f"/booking/{booking_id}/confirm")
+    assert confirm.status_code == 200, confirm.text
+    assert confirm.json()["status"] == "accepted"
 
     provider_headers = get_auth_headers(provider_id, provider_verified=True)
     response = client.patch(
