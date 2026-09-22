@@ -137,6 +137,29 @@ Supported provider sort values are `rating`, `nearest`, `price_low`, and `price_
 Use `available_only=true`, `min_price`, `max_price`, `search`, `limit`, and `offset`
 as optional query parameters on `/providers`.
 
+## Client and Provider Workflow APIs
+
+The account and onboarding screens use these endpoints:
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /client/home/{user_id}` | Client profile summary and booking stats |
+| `GET /client/{user_id}/bookings` | Client booking history |
+| `GET /provider/{user_id}/bookings` | Provider job queue/history |
+| `GET/POST/PATCH/DELETE /client/{user_id}/addresses` | Saved service addresses |
+| `GET/PATCH /client/{user_id}/settings` | SMS notification preference |
+| `GET/PATCH /provider/application/{user_id}` | Provider onboarding draft and status |
+| `POST /provider/application/{user_id}/submit` | Submit provider profile for review |
+| `GET /provider/dashboard/{user_id}` | Provider status, job and earnings summary |
+| `POST/DELETE /provider/{user_id}/portfolio` | Manage provider portfolio items |
+| `POST /client/{client_id}/bookings/{booking_id}/review` | Review a completed booking |
+
+Apply the latest migration before using these endpoints:
+
+```powershell
+python -m alembic upgrade head
+```
+
 ## Verify the Server
 
 Open these URLs in a browser, or use them from another client:

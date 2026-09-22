@@ -9,6 +9,7 @@ from app.routes.auth import router as auth_router
 from app.routes.booking import router as booking_router
 from app.routes.provider import router as provider_router
 from app.routes.profile import router as profile_router
+from app.routes.account import router as account_router
 from database import check_database_connection
 
 load_dotenv()
@@ -39,6 +40,7 @@ app.include_router(auth_router)
 app.include_router(provider_router)
 app.include_router(profile_router)
 app.include_router(booking_router)
+app.include_router(account_router)
 
 @app.get("/")
 async def root():
