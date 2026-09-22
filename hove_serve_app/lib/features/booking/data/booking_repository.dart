@@ -20,6 +20,18 @@ class BookingRepository {
 
   Future<String?> _token() => _storage.readToken();
 
+  Future<List<BookingItem>> listForClient(int clientId) async {
+    final json = await _client.get(
+      '/booking?client_id=$clientId',
+      token: await _token(),
+    );
+    final items = json['items'] as List<dynamic>? ?? const [];
+    return items
+        .map((item) =>
+            BookingItem.fromJson(Map<String, dynamic>.from(item as Map)))
+        .toList();
+  }
+
   Future<BookingItem> create({
     required int clientId,
     required int providerId,

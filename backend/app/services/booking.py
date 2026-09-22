@@ -110,7 +110,7 @@ def get_booking_summary(db: Session, booking_id: int) -> dict | None:
     estimate = get_booking_estimate(db, booking_id)
     estimated_total = float(estimate["estimated_price"]) if estimate else float(booking.get("price_estimate") or 0)
     provider = db.execute(
-        text("SELECT u.name, pp.rating_avg, pp.verified, pp.location, pp.categories FROM users u JOIN provider_profiles pp ON pp.user_id = u.id WHERE u.id = :provider_id"),
+        text("SELECT u.name, pp.rating_avg, pp.verified, pp.location, pp.categories, pp.profile_photo FROM users u JOIN provider_profiles pp ON pp.user_id = u.id WHERE u.id = :provider_id"),
         {"provider_id": booking["provider_id"]},
     ).mappings().first()
     return {
@@ -123,6 +123,7 @@ def get_booking_summary(db: Session, booking_id: int) -> dict | None:
         "status": booking["status"],
         "provider": {
             "name": provider["name"] if provider else None,
+            "profile_photo": provider["profile_photo"] if provider else None,
             "rating": float(provider["rating_avg"]) if provider and provider["rating_avg"] is not None else 4.9,
             "verified": bool(provider["verified"]) if provider else True,
             "location": provider["location"] if provider else None,

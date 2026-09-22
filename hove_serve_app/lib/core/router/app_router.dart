@@ -12,6 +12,8 @@ import '../../features/provider/screens/provider_home_screen.dart';
 import '../../features/provider/screens/provider_profile_screen.dart';
 import '../../features/provider/models/provider_models.dart';
 import '../../features/booking/screens/booking_screen.dart';
+import '../../features/booking/screens/booking_history_screen.dart';
+import '../../features/booking/screens/booking_details_screen.dart';
 import '../widgets/placeholder_screen.dart';
 import '../widgets/app_shell.dart';
 
@@ -81,8 +83,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/booking',
-                builder: (context, state) =>
-                    const PlaceholderScreen(title: 'Bookings'),
+                builder: (context, state) => const BookingHistoryScreen(),
               ),
             ],
           ),
@@ -116,6 +117,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/booking/new',
         builder: (context, state) => BookingScreen(
           provider: state.extra as ProviderProfileItem,
+        ),
+      ),
+      GoRoute(
+        path: '/booking/:bookingId/details',
+        builder: (context, state) => BookingDetailsScreen(
+          bookingId: int.parse(state.pathParameters['bookingId']!),
         ),
       ),
       GoRoute(

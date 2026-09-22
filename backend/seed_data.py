@@ -59,6 +59,15 @@ REVIEWS = [
     (506, 103, 204, "Electrician", 4, "Smart lighting setup looks great and the wiring was kept very tidy.", datetime(2026, 9, 4, 15, 30)),
 ]
 
+DEMO_BOOKINGS = [
+    (601, 101, 201, "Electrician", "accepted", datetime(2026, 9, 24, 10, 0),
+     "House 42, Road 7/A, Dhanmondi R/A, Dhaka - 1209",
+     "Main circuit breaker keeps tripping repeatedly under load in"),
+    (602, 102, 203, "Appliance Repair", "requested", datetime(2026, 9, 25, 15, 0),
+     "Flat 4B, Road 11, Gulshan 1, Dhaka",
+     "Please inspect the refrigerator cooling issue and wiring safety."),
+]
+
 
 def _upsert_user(db, user_id, name, phone, password_hash):
     exists = db.execute(text("SELECT id FROM users WHERE id = :id"), {"id": user_id}).first()
@@ -128,7 +137,26 @@ def seed() -> None:
                 ON DUPLICATE KEY UPDATE rating = VALUES(rating), comment = VALUES(comment), created_at = VALUES(created_at)"""),
                 {"id": booking_id, "booking_id": booking_id, "rating": rating, "comment": comment, "created_at": scheduled_at})
 
-    print(f"Seeded {len(CLIENTS)} clients, {len(PROVIDERS)} providers, {len(PORTFOLIO)} portfolio items, and {len(REVIEWS)} reviews.")
+        for booking_id, client_id, provider_id, category_name, status, scheduled_at, address, notes in DEMO_BOOKINGS:
+            category_id = db.execute(
+                text("SELECT id FROM service_categories WHERE name = :name"),
+                {"name": category_name},
+            ).scalar_one()
+            db.execute(text("""INSERT INTO bookings
+                (id, client_id, provider_id, category_id, status, scheduled_at, address,
+                 price_estimate, payment_status, customer_notes)
+                VALUES (:id, :client_id, :provider_id, :category_id, :status, :scheduled_at,
+                        :address, :price_estimate, 'unpaid', :customer_notes)
+                ON DUPLICATE KEY UPDATE client_id = VALUES(client_id), provider_id = VALUES(provider_id),
+                category_id = VALUES(category_id), status = VALUES(status), scheduled_at = VALUES(scheduled_at),
+                address = VALUES(address), price_estimate = VALUES(price_estimate),
+                payment_status = VALUES(payment_status), customer_notes = VALUES(customer_notes)"""),
+                {"id": booking_id, "client_id": client_id, "provider_id": provider_id,
+                 "category_id": category_id, "status": status, "scheduled_at": scheduled_at,
+                 "address": address, "price_estimate": base_price_for(db, category_id),
+                 "customer_notes": notes})
+
+    print(f"Seeded {len(CLIENTS)} clients, {len(PROVIDERS)} providers, {len(PORTFOLIO)} portfolio items, {len(REVIEWS)} reviews, and {len(DEMO_BOOKINGS)} active bookings.")
 
 
 def base_price_for(db, category_id: int):

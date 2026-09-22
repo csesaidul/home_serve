@@ -1,12 +1,33 @@
 class BookingItem {
-  const BookingItem({required this.id, required this.status});
+  const BookingItem({
+    required this.id,
+    required this.status,
+    this.providerId,
+    this.providerName,
+    this.categoryName,
+    this.scheduledAt,
+    this.address,
+    this.priceEstimate,
+  });
 
   final int id;
   final String status;
+  final int? providerId;
+  final String? providerName;
+  final String? categoryName;
+  final DateTime? scheduledAt;
+  final String? address;
+  final double? priceEstimate;
 
   factory BookingItem.fromJson(Map<String, dynamic> json) => BookingItem(
         id: (json['id'] as num?)?.toInt() ?? 0,
         status: json['status'] as String? ?? 'requested',
+        providerId: (json['provider_id'] as num?)?.toInt(),
+        providerName: json['provider_name'] as String?,
+        categoryName: json['category_name'] as String?,
+        scheduledAt: DateTime.tryParse(json['scheduled_at']?.toString() ?? ''),
+        address: json['address'] as String?,
+        priceEstimate: (json['price_estimate'] as num?)?.toDouble(),
       );
 }
 
@@ -20,6 +41,8 @@ class BookingSummary {
     required this.platformFee,
     required this.total,
     required this.providerName,
+    this.providerId,
+    this.providerPhoto,
   });
 
   final int bookingId;
@@ -30,6 +53,8 @@ class BookingSummary {
   final double platformFee;
   final double total;
   final String providerName;
+  final int? providerId;
+  final String? providerPhoto;
 
   factory BookingSummary.fromJson(Map<String, dynamic> json) {
     final payment = Map<String, dynamic>.from(json['payment'] as Map? ?? {});
@@ -45,6 +70,8 @@ class BookingSummary {
           (payment['safety_and_platform_fee'] as num?)?.toDouble() ?? 0,
       total: (payment['estimated_total'] as num?)?.toDouble() ?? 0,
       providerName: provider['name'] as String? ?? 'Selected provider',
+      providerId: (json['provider_id'] as num?)?.toInt(),
+      providerPhoto: provider['profile_photo'] as String?,
     );
   }
 }
